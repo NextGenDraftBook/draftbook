@@ -600,7 +600,81 @@ export const actualizarUsuario = async (req: Request, res: Response) => {
   }
 };
 
+ // Función para bloquear/desbloquear usuario
+export const toggleBloquearUsuario = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { activo } = req.body;
 
+    // Verificar que el usuario no sea SUPERADMIN
+    const usuario = await prisma.usuario.findUnique({
+      where: { id }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (usuario.rol === 'SUPERADMIN') {
+      return res.status(403).json({ error: 'No se puede bloquear un superadmin' });
+    }
+
+    const usuarioActualizado = await prisma.usuario.update({
+      where: { id },
+      data: { activo },
+      select: {
+        id: true,
+        email: true,
+        nombre: true,
+        apellido: true,
+        rol: true,
+        activo: true,
+        createdAt: true,
+        negocio: {
+          select: {
+            id: true,
+            nombre: true,
+            slug: true
+          }
+        }
+      }
+    });
+
+    return res.json(usuarioActualizado);
+  } catch (error) {
+    console.error('Error bloqueando/desbloqueando usuario:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Función para eliminar usuario
+export const eliminarUsuario = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que el usuario existe y no es SUPERADMIN
+    const usuario = await prisma.usuario.findUnique({
+      where: { id }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (usuario.rol === 'SUPERADMIN') {
+      return res.status(403).json({ error: 'No se puede eliminar un superadmin' });
+    }
+
+    await prisma.usuario.delete({
+      where: { id }
+    });
+
+    return res.json({ message: 'Usuario eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error eliminando usuario:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
 
 // Función para obtener actividad reciente
 export const obtenerActividadReciente = async (req: Request, res: Response) => {
