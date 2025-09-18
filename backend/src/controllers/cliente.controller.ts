@@ -225,6 +225,66 @@ export const obtenerCliente = async (req: Request, res: Response) => {
   }
 };
 
+export const actualizarCliente = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const datos = actualizarClienteSchema.parse(req.body);
+
+    if (!req.negocio) {
+      return res.status(400).json({ error: 'Negocio no identificado' });
+    }
+
+    // Verificar que el cliente existe y pertenece al negocio
+    const clienteExistente = await prisma.cliente.findFirst({
+      where: {
+        id,
+        negocioId: req.negocio.id
+      }
+    });
+
+    if (!clienteExistente) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    // Verificar si el email ya está en uso por otro cliente
+    if (datos.email && datos.email !== clienteExistente.email) {
+      const emailEnUso = await prisma.cliente.findFirst({
+        where: {
+          email: datos.email,
+          negocioId: req.negocio.id,
+          id: {
+            not: id
+          }
+        }
+      });
+
+      if (emailEnUso) {
+        return res.status(400).json({ error: 'Ya existe otro cliente con ese email' });
+      }
+    }
+
+    // Actualizar el cliente
+    const cliente = await prisma.cliente.update({
+      where: { id },
+      data: {
+        ...datos,
+        fechaNacimiento: datos.fechaNacimiento ? parseDateOnly(datos.fechaNacimiento) : undefined
+      }
+    });
+
+    res.json({
+      message: 'Cliente actualizado exitosamente',
+      cliente
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    console.error('Error actualizando cliente:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 
 
 export const obtenerEstadisticasCliente = async (req: Request, res: Response) => {
