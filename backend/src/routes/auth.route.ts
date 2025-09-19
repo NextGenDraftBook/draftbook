@@ -6,6 +6,7 @@ import {
   obtenerPerfil, 
   cambiarPassword, 
   logout,
+  getProfile,
   verificarToken
 } from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
