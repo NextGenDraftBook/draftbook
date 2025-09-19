@@ -275,31 +275,52 @@ export const obtenerEstadisticasAvanzadas = async (req: Request, res: Response) 
     }
 
     // Estadísticas de citas por día de la semana
-    const citasPorDiaSemana = await prisma.$queryRaw`
+    // Estadísticas de citas por día de la semana (parameterized query)
+    let citasQuery = `
       SELECT 
         EXTRACT(DOW FROM fecha) as dia_semana,
         COUNT(*) as total_citas,
         COUNT(CASE WHEN estado = 'COMPLETADA' THEN 1 END) as citas_completadas
       FROM citas
-      WHERE "negocioId" = ${negocioId}
-        ${fechaInicio ? `AND fecha >= ${new Date(fechaInicio as string)}` : ''}
-        ${fechaFin ? `AND fecha <= ${new Date(fechaFin as string)}` : ''}
+      WHERE "negocioId" = ?
+    `;
+    const citasParams: any[] = [negocioId];
+    if (fechaInicio) {
+      citasQuery += ' AND fecha >= ?';
+      citasParams.push(new Date(fechaInicio as string));
+    }
+    if (fechaFin) {
+      citasQuery += ' AND fecha <= ?';
+      citasParams.push(new Date(fechaFin as string));
+    }
+    citasQuery += `
       GROUP BY EXTRACT(DOW FROM fecha)
       ORDER BY dia_semana
     `;
+    const citasPorDiaSemana = await prisma.$queryRaw(citasQuery, ...citasParams);
 
-    // Estadísticas de clientes nuevos por mes
-    const clientesNuevosPorMes = await prisma.$queryRaw`
+    // Estadísticas de clientes nuevos por mes (parameterized query)
+    let clientesQuery = `
       SELECT 
         DATE_TRUNC('month', "createdAt") as mes,
         COUNT(*) as clientes_nuevos
       FROM clientes
-      WHERE "negocioId" = ${negocioId}
-        ${fechaInicio ? `AND "createdAt" >= ${new Date(fechaInicio as string)}` : ''}
-        ${fechaFin ? `AND "createdAt" <= ${new Date(fechaFin as string)}` : ''}
+      WHERE "negocioId" = ?
+    `;
+    const clientesParams: any[] = [negocioId];
+    if (fechaInicio) {
+      clientesQuery += ' AND "createdAt" >= ?';
+      clientesParams.push(new Date(fechaInicio as string));
+    }
+    if (fechaFin) {
+      clientesQuery += ' AND "createdAt" <= ?';
+      clientesParams.push(new Date(fechaFin as string));
+    }
+    clientesQuery += `
       GROUP BY DATE_TRUNC('month', "createdAt")
       ORDER BY mes DESC
     `;
+    const clientesNuevosPorMes = await prisma.$queryRaw(clientesQuery, ...clientesParams);
 
     // Top 5 clientes más frecuentes
     const topClientes = await prisma.cita.groupBy({
