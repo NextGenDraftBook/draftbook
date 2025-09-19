@@ -1,14 +1,27 @@
 import { Router } from 'express';
-import { login, logout, obtenerPerfil } from '../controllers/auth.controller';
+import { 
+  login, 
+  registro, 
+  registroCliente,
+  obtenerPerfil, 
+  cambiarPassword, 
+  logout,
+  verificarToken
+} from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// Rutas públicas (no requieren autenticación)
+// Rutas públicas
 router.post('/login', login);
+router.post('/registro', registro);
+router.post('/register-cliente', registroCliente);
 
-// Rutas protegidas (requieren autenticación)
+// Rutas protegidas
+router.get('/perfil', authMiddleware, obtenerPerfil);
+router.get('/profile', authMiddleware, obtenerPerfil); // Mantener ambas rutas por compatibilidad
+router.get('/verificar', authMiddleware, verificarToken);
+router.put('/cambiar-password', authMiddleware, cambiarPassword);
 router.post('/logout', authMiddleware, logout);
-router.get('/profile', authMiddleware, obtenerPerfil);
 
 export default router;
