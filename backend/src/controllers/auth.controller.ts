@@ -479,19 +479,6 @@ export const cambiarPassword = async (req: Request, res: Response) => {
 
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
-// Función de logout
-export const logout = async (req: Request, res: Response) => {
-  try {
-    // En JWT, el logout se maneja del lado del cliente eliminando el token
-    // Aquí solo enviamos una respuesta de confirmación
-    return res.json({ 
-      message: 'Logout exitoso',
-      success: true 
-    });
-  } catch (error) {
-    console.error('Error en logout:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
-  }
 };
 
 export const verificarToken = async (req: Request, res: Response) => {
@@ -539,7 +526,15 @@ export const verificarToken = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  // En JWT, el logout se maneja del lado del cliente eliminando el token
-  // Aquí solo enviamos una respuesta de confirmación
-  return res.json({ message: 'Logout exitoso' });
+  try {
+    // En JWT, el logout se maneja del lado del cliente eliminando el token
+    // Aquí solo enviamos una respuesta de confirmación
+    return res.json({ 
+      message: 'Logout exitoso',
+      success: true 
+    });
+  } catch (error) {
+    console.error('Error en logout:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
 };
