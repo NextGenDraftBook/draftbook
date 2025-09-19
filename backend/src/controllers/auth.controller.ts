@@ -533,9 +533,3 @@ export const verificarToken = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
-
-export const logout = async (req: Request, res: Response) => {
-  // En JWT, el logout se maneja del lado del cliente eliminando el token
-  // Aquí solo enviamos una respuesta de confirmación
-  return res.json({ message: 'Logout exitoso' });
-};
