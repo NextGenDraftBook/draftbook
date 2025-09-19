@@ -21,6 +21,9 @@
     "clean": "rm -rf node_modules frontend/node_modules backend/node_modules frontend/dist"
   },
   "devDependencies": {
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@types/react-router-dom": "^5.3.3",
     "concurrently": "^9.1.2"
   },
   "author": "",
@@ -31,5 +34,18 @@
     "typescript",
     "express",
     "vite"
-  ]
+  ],
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "autoprefixer": "^10.4.21",
+    "lucide-react": "^0.544.0",
+    "postcss": "^8.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.62.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.1",
+    "tailwindcss": "^4.1.13",
+    "zod": "^4.1.9"
+  }
 }
