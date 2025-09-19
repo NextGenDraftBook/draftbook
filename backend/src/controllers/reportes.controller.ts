@@ -47,22 +47,13 @@ export const generarReportePacientes = async (req: AuthenticatedRequest, res: Re
       return res.status(400).json({ error: 'Doctor no especificado' });
     }
 
-<<<<<<< Updated upstream
-    // Verificar que el doctor pertenece al negocio y tiene el rol adecuado
-=======
     // Verificar que el doctor (usuario admin) pertenece al negocio
->>>>>>> Stashed changes
     const doctor = await prisma.usuario.findUnique({
       where: { id: doctorId },
       select: { negocioId: true, rol: true },
     });
-<<<<<<< Updated upstream
     if (!doctor || doctor.negocioId !== req.negocio.id || (doctor.rol !== 'ADMIN' && doctor.rol !== 'SUPERADMIN')) {
       return res.status(403).json({ error: 'No tienes permisos para generar este reporte para el usuario especificado' });
-=======
-    if (!doctor || doctor.negocioId !== req.negocio.id || doctor.rol !== 'ADMIN') {
-      return res.status(403).json({ error: 'No tienes permisos para generar este reporte para el doctor especificado' });
->>>>>>> Stashed changes
     }
 
     const config = {
