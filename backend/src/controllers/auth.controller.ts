@@ -474,6 +474,8 @@ export const cambiarPassword = async (req: Request, res: Response) => {
     return res.json({ message: 'Contraseña actualizada exitosamente' });
   } catch (error) {
     console.error('Error cambiando contraseña:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
 // Función de logout
 export const logout = async (req: Request, res: Response) => {
   try {
