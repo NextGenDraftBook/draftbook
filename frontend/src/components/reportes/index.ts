@@ -1,0 +1,1 @@
+export { GenerarReporteModal } from './GenerarReporteModal';
