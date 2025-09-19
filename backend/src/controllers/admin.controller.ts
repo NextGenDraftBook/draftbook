@@ -298,7 +298,7 @@ export const crearCita = async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
         error: 'Datos inválidos', 
-        details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
+        details: error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`) 
       });
     }
     console.error('Error creando cita:', error);
@@ -366,7 +366,7 @@ export const actualizarCita = async (req: Request, res: Response) => {
     return res.json(cita);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando cita:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -491,7 +491,7 @@ export const crearCliente = async (req: Request, res: Response) => {
     return res.status(201).json(cliente);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando cliente:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -538,7 +538,7 @@ export const actualizarCliente = async (req: Request, res: Response) => {
     return res.json(cliente);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando cliente:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -725,7 +725,7 @@ export const crearReceta = async (req: Request, res: Response) => {
     return res.status(201).json(receta);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando receta:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -796,7 +796,7 @@ export const actualizarReceta = async (req: Request, res: Response) => {
     return res.json(receta);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando receta:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
