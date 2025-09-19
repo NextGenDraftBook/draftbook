@@ -16,8 +16,20 @@ const generarReporteSchema = z.object({
 });
 
 interface AuthenticatedRequest extends Request {
-  negocio?: { id: string };
-  usuario?: { id: string; negocioId: string };
+  negocio?: { 
+    id: string; 
+    slug: string; 
+    nombre: string; 
+    email: string; 
+    activo: boolean; 
+    suspendido: boolean; 
+  };
+  usuario?: { 
+    id: string; 
+    email: string; 
+    rol: string; 
+    negocioId?: string; 
+  };
 }
 
 export const generarReportePacientes = async (req: AuthenticatedRequest, res: Response) => {
