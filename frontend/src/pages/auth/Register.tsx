@@ -284,7 +284,7 @@ const Register: React.FC = () => {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {tipoRegistro === 'negocio' 
-              ? 'Registra tu consultorio médico en DraftCitas' 
+              ? 'Registra tu consultorio médico en draftbook' 
               : 'Únete como paciente a un consultorio existente'
             }
           </p>

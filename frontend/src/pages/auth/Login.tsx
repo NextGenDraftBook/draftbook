@@ -88,7 +88,7 @@ const Login: React.FC = () => {
                 Cerrar
               </button>
               <a
-                href="https://wa.me/5214774793855?text=Hola,%20necesito%20ayuda%20para%20recuperar%20mi%20contraseña%20en%20DraftCitas"
+                href="https://wa.me/5214774793855?text=Hola,%20necesito%20ayuda%20para%20recuperar%20mi%20contraseña%20en%20draftbook"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 text-center"
@@ -123,7 +123,7 @@ const Login: React.FC = () => {
             </svg>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Bienvenido a DraftCitas
+            Bienvenido a DraftBook
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Accede a tu cuenta para gestionar tus citas
@@ -266,7 +266,7 @@ const Login: React.FC = () => {
                 Sistema de Gestión de Citas
               </h3>
               <div className="mt-2 text-sm text-gray-600">
-                <p>DraftCitas te permite gestionar citas de manera eficiente y profesional.</p>
+                <p>draftbook te permite gestionar citas de manera eficiente y profesional.</p>
                 <p className="mt-1">Accede con tus credenciales para comenzar.</p>
               </div>
             </div>
