@@ -48,8 +48,12 @@ export const generarReportePacientes = async (req: AuthenticatedRequest, res: Re
     }
 
     // Verificar que el doctor pertenece al negocio
-    if (req.usuario?.negocioId !== req.negocio.id) {
-      return res.status(403).json({ error: 'No tienes permisos para generar este reporte' });
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: doctorId },
+      select: { negocioId: true },
+    });
+    if (!doctor || doctor.negocioId !== req.negocio.id) {
+      return res.status(403).json({ error: 'No tienes permisos para generar este reporte para el doctor especificado' });
     }
 
     const config = {
