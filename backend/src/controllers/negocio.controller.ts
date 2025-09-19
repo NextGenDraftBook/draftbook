@@ -274,9 +274,9 @@ export const obtenerEstadisticasAvanzadas = async (req: Request, res: Response) 
       }
     }
 
-    // Estadísticas de citas por día de la semana
     // Estadísticas de citas por día de la semana (parameterized query)
     let citasQuery = `
+    const citasPorDiaSemana = await prisma.$queryRaw`
       SELECT 
         EXTRACT(DOW FROM fecha) as dia_semana,
         COUNT(*) as total_citas,
@@ -301,6 +301,7 @@ export const obtenerEstadisticasAvanzadas = async (req: Request, res: Response) 
 
     // Estadísticas de clientes nuevos por mes (parameterized query)
     let clientesQuery = `
+
       SELECT 
         DATE_TRUNC('month', "createdAt") as mes,
         COUNT(*) as clientes_nuevos
@@ -321,6 +322,7 @@ export const obtenerEstadisticasAvanzadas = async (req: Request, res: Response) 
       ORDER BY mes DESC
     `;
     const clientesNuevosPorMes = await prisma.$queryRaw(clientesQuery, ...clientesParams);
+
 
     // Top 5 clientes más frecuentes
     const topClientes = await prisma.cita.groupBy({

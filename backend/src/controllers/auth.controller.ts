@@ -389,6 +389,7 @@ export const registroCliente = async (req: Request, res: Response) => {
       return res.status(400).json({ 
         error: 'Datos de entrada inválidos',
         details: error.errors 
+
       });
     }
     
@@ -476,6 +477,9 @@ export const cambiarPassword = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error cambiando contraseña:', error);
 
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+// Función de logout
 export const logout = async (req: Request, res: Response) => {
   try {
     // En JWT, el logout se maneja del lado del cliente eliminando el token
@@ -532,4 +536,10 @@ export const verificarToken = async (req: Request, res: Response) => {
     console.error('Error verificando token:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  // En JWT, el logout se maneja del lado del cliente eliminando el token
+  // Aquí solo enviamos una respuesta de confirmación
+  return res.json({ message: 'Logout exitoso' });
 };
