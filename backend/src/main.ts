@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route';
 import reportesRoutes from './routes/reportes.route';
 
-
 // Cargar variables de entorno
 dotenv.config();
 
