@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo principal para identificar el negocio/cliente
+model Negocio {
+  id          String   @id @default(cuid())
+  slug        String   @unique // subdominio: consultoriox.draftcitas.com
+  nombre      String
+  email       String
+  telefono    String?
+  direccion   String?
+  ciudad      String?
+  estado      String?
+  codigoPostal String?
+  descripcion String?
+  especialidad String?
+  horarioAtencion String? // Horario completo como texto libre
+  sitioWeb     String?
+  activo      Boolean  @default(true)
+  suspendido  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  usuarios    Usuario[]
+  clientes    Cliente[]
+  citas       Cita[]
+  pagosSistema PagoSistema[]
+  documentos  Documento[]
+  recetas     Receta[]
+  notificaciones Notificacion[]
+  plantillasMembretes PlantillaMembrete[]
+
+  @@map("negocios")
+}
+
+// Usuarios del sistema (admin del negocio, superadmin)
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nombre    String
+  apellido  String?
+  rol       Rol      @default(ADMIN)
+  activo    Boolean  @default(true)
+  negocioId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  negocio   Negocio? @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  citas     Cita[]
+  recetas   Receta[]
+  documentos Documento[]
+
+  @@map("usuarios")
+}
+
+// Clientes del negocio (pacientes)
+model Cliente {
+  id          String   @id @default(cuid())
+  nombre      String
+  apellido    String?
+  email       String?
+  telefono    String?
+  fechaNacimiento DateTime?
+  genero      String?
+  direccion   String?
+  activo      Boolean  @default(true)
+  negocioId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  negocio     Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  citas       Cita[]
+  pagosCliente PagoCliente[]
+  documentos  Documento[]
+  recetas     Receta[]
+  notificaciones Notificacion[]
+
+  @@map("clientes")
+}
+
+// Citas del sistema
+model Cita {
+  id          String   @id @default(cuid())
+  fecha       DateTime
+  hora        String
+  duracion    Int      @default(60) // minutos
+  estado      EstadoCita @default(PENDIENTE)
+  motivo      String?
+  notas       String?
+  negocioId   String
+  clienteId   String
+  usuarioId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  negocio     Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+  notificaciones Notificacion[]
+  pagosCliente PagoCliente[]
+  recetas     Receta[]
+
+  @@map("citas")
+}
+
+// Pagos del sistema (negocios hacia ti)
+model PagoSistema {
+  id          String   @id @default(cuid())
+  monto       Float
+  moneda      String   @default("MXN")
+  fechaInicio DateTime
+  fechaFin    DateTime
+  estado      EstadoPago @default(PENDIENTE)
+  referencia  String?  // número de referencia del pago
+  metodo      String?  // transferencia, tarjeta, etc.
+  negocioId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  negocio     Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  @@map("pagos_sistema")
+}
+
+// Pagos de clientes (pacientes hacia el negocio)
+model PagoCliente {
+  id          String   @id @default(cuid())
+  monto       Float
+  moneda      String   @default("MXN")
+  concepto    String
+  estado      EstadoPago @default(PENDIENTE)
+  fechaPago   DateTime?
+  referencia  String?
+  metodo      String?
+  clienteId   String
+  citaId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  cita        Cita?    @relation(fields: [citaId], references: [id])
+
+  @@map("pagos_cliente")
+}
+
+// Documentos subidos por clientes
+model Documento {
+  id            String   @id @default(cuid())
+  nombre        String   // Etiqueta descriptiva (ej: "Análisis de sangre")
+  nombreOriginal String? // Nombre original del archivo subido
+  tipo          String   // pdf, imagen, etc.
+  url           String   // ruta del archivo
+  tamanio       Int      // bytes
+  clienteId     String
+  negocioId     String
+  usuarioId     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  cliente       Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  negocio       Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  usuario       Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@map("documentos")
+}
+
+// Plantillas de membrete para recetas
+model PlantillaMembrete {
+  id              String   @id @default(cuid())
+  nombre          String   // nombre de la plantilla
+  logoUrl         String?  // URL del logo/imagen
+  nombreDoctor    String   // nombre del doctor
+  especialidad    String?  // especialidad médica
+  cedulaProfesional String? // cédula profesional
+  telefono        String?  // teléfono del consultorio
+  email           String?  // email del consultorio
+  direccion       String?  // dirección del consultorio
+  ciudad          String?  // ciudad
+  estado          String?  // estado
+  codigoPostal    String?  // código postal
+  esActiva        Boolean  @default(false) // si es la plantilla activa
+  negocioId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  negocio         Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+
+  @@map("plantillas_membrete")
+}
+
+// Recetas médicas
+model Receta {
+  id          String   @id @default(cuid())
+  contenido   String   // contenido de la receta
+  pdfUrl      String?  // URL del PDF generado
+  clienteId   String
+  negocioId   String
+  usuarioId   String
+  citaId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  negocio     Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  cita        Cita?    @relation(fields: [citaId], references: [id])
+
+  @@map("recetas")
+}
+
+// Log de notificaciones enviadas y notificaciones a clientes
+model Notificacion {
+  id          String   @id @default(cuid())
+  tipo        TipoNotificacion
+  destinatario String
+  asunto      String?
+  contenido   String
+  enviado     Boolean  @default(false)
+  error       String?
+  negocioId   String
+  
+  // Campos para notificaciones a clientes
+  clienteId   String?
+  citaId      String?
+  leida       Boolean  @default(false)
+  esNotificacionCliente Boolean @default(false) // Para distinguir entre logs y notificaciones
+  
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  negocio     Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  cliente     Cliente? @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  cita        Cita?    @relation(fields: [citaId], references: [id], onDelete: SetNull)
+
+  @@map("notificaciones")
+}
+
+// Enums
+enum Rol {
+  SUPERADMIN
+  ADMIN
+  CLIENTE
+}
+
+enum EstadoCita {
+  PENDIENTE
+  CONFIRMADA
+  RECHAZADA
+  COMPLETADA
+  CANCELADA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  RECHAZADO
+  VENCIDO
+}
+
+enum TipoNotificacion {
+  EMAIL
+  WHATSAPP
+  SMS
+  CITA_AGENDADA
+  CITA_CANCELADA
+  CITA_REAGENDADA
+  CITA_CONFIRMADA
+  RECORDATORIO_CITA
+}
