@@ -47,13 +47,13 @@ export const generarReportePacientes = async (req: AuthenticatedRequest, res: Re
       return res.status(400).json({ error: 'Doctor no especificado' });
     }
 
-    // Verificar que el doctor pertenece al negocio
-    const doctor = await prisma.doctor.findUnique({
+    // Verificar que el doctor pertenece al negocio y tiene el rol adecuado
+    const doctor = await prisma.usuario.findUnique({
       where: { id: doctorId },
-      select: { negocioId: true },
+      select: { negocioId: true, rol: true },
     });
-    if (!doctor || doctor.negocioId !== req.negocio.id) {
-      return res.status(403).json({ error: 'No tienes permisos para generar este reporte para el doctor especificado' });
+    if (!doctor || doctor.negocioId !== req.negocio.id || (doctor.rol !== 'ADMIN' && doctor.rol !== 'SUPERADMIN')) {
+      return res.status(403).json({ error: 'No tienes permisos para generar este reporte para el usuario especificado' });
     }
 
     const config = {
@@ -101,7 +101,9 @@ export const obtenerDoctoresParaReporte = async (req: AuthenticatedRequest, res:
     const doctores = await prisma.usuario.findMany({
       where: {
         negocioId: req.negocio.id,
-        rol: 'ADMIN',
+          rol: {
+            in: ['ADMIN', 'SUPERADMIN']
+          },
         activo: true,
         citas: {
           some: {}
