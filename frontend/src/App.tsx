@@ -10,10 +10,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* <Route path="/" element={<Dashboard />} /> */}
-          {/* Puedes agregar más rutas aquí */}
         </Routes>
       </Router>
     </AuthProvider>
