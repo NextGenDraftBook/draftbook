@@ -20,21 +20,14 @@ export interface DoctorReporte {
 
 export const reportesService = {
   generarReportePacientes: async (config: ConfigReporte): Promise<Blob> => {
-    const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:3001/api/reportes/pacientes/pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      body: JSON.stringify(config),
-    });
-
-    if (!response.ok) {
+    try {
+      const response = await api.post('/reportes/pacientes/pdf', config, {
+        responseType: 'blob',
+      });
+      return response.data;
+    } catch (error) {
       throw new Error('Error generando reporte');
     }
-
-    return await response.blob();
   },
 
   obtenerDoctores: async (): Promise<{ doctores: DoctorReporte[] }> => {
