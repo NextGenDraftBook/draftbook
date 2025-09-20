@@ -25,7 +25,7 @@ const registerSchema = z.object({
   descripcion: z.string().optional(),
   especialidad: z.string().optional(),
   horarioAtencion: z.string().optional(),
-  sitioWeb: z.string().url('Debe ser una URL válida').optional().or(z.literal(''))
+  sitioWeb: z.string().url('Debe ser una URL válida').optional().transform(val => val === '' ? undefined : val)
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
