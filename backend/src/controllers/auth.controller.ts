@@ -153,7 +153,7 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.issues[0].message });
+      return res.status(400).json({ error: error.errors[0].message });
     }
     console.error('Error en login:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -298,7 +298,7 @@ export const registro = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.issues[0].message });
+      return res.status(400).json({ error: error.errors[0].message });
     }
     console.error('Error en registro:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -388,7 +388,8 @@ export const registroCliente = async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
         error: 'Datos de entrada inválidos',
-        details: error.issues 
+        details: error.errors 
+
       });
     }
     
@@ -427,6 +428,7 @@ export const obtenerPerfil = async (req: Request, res: Response) => {
     return res.json({ usuario: usuarioSinPassword });
   } catch (error) {
     console.error('Error obteniendo perfil:', error);
+
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
@@ -474,6 +476,7 @@ export const cambiarPassword = async (req: Request, res: Response) => {
     return res.json({ message: 'Contraseña actualizada exitosamente' });
   } catch (error) {
     console.error('Error cambiando contraseña:', error);
+
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

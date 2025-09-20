@@ -19,7 +19,6 @@ router.post('/register-cliente', registroCliente);
 
 // Rutas protegidas
 router.get('/perfil', authMiddleware, obtenerPerfil);
-router.get('/profile', authMiddleware, obtenerPerfil); // Mantener ambas rutas por compatibilidad
 router.get('/verificar', authMiddleware, verificarToken);
 router.put('/cambiar-password', authMiddleware, cambiarPassword);
 router.post('/logout', authMiddleware, logout);
