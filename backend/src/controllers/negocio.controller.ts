@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
@@ -274,54 +274,32 @@ export const obtenerEstadisticasAvanzadas = async (req: Request, res: Response) 
       }
     }
 
-    // Estadísticas de citas por día de la semana (parameterized query)
-    let citasQuery = `
+    // Estadísticas de citas por día de la semana
     const citasPorDiaSemana = await prisma.$queryRaw`
       SELECT 
         EXTRACT(DOW FROM fecha) as dia_semana,
         COUNT(*) as total_citas,
         COUNT(CASE WHEN estado = 'COMPLETADA' THEN 1 END) as citas_completadas
       FROM citas
-      WHERE "negocioId" = ?
-    `;
-    const citasParams: any[] = [negocioId];
-    if (fechaInicio) {
-      citasQuery += ' AND fecha >= ?';
-      citasParams.push(new Date(fechaInicio as string));
-    }
-    if (fechaFin) {
-      citasQuery += ' AND fecha <= ?';
-      citasParams.push(new Date(fechaFin as string));
-    }
-    citasQuery += `
+      WHERE "negocioId" = ${negocioId}
+      ${fechaInicio ? Prisma.sql`AND fecha >= ${fechaInicio}` : Prisma.empty}
+      ${fechaFin ? Prisma.sql`AND fecha <= ${fechaFin}` : Prisma.empty}
       GROUP BY EXTRACT(DOW FROM fecha)
       ORDER BY dia_semana
     `;
-    const citasPorDiaSemana = await prisma.$queryRaw(citasQuery, ...citasParams);
 
-    // Estadísticas de clientes nuevos por mes (parameterized query)
-    let clientesQuery = `
-
+    // Estadísticas de clientes nuevos por mes
+    const clientesNuevosPorMes = await prisma.$queryRaw`
       SELECT 
         DATE_TRUNC('month', "createdAt") as mes,
         COUNT(*) as clientes_nuevos
       FROM clientes
-      WHERE "negocioId" = ?
-    `;
-    const clientesParams: any[] = [negocioId];
-    if (fechaInicio) {
-      clientesQuery += ' AND "createdAt" >= ?';
-      clientesParams.push(new Date(fechaInicio as string));
-    }
-    if (fechaFin) {
-      clientesQuery += ' AND "createdAt" <= ?';
-      clientesParams.push(new Date(fechaFin as string));
-    }
-    clientesQuery += `
+      WHERE "negocioId" = ${negocioId}
+      ${fechaInicio ? Prisma.sql`AND "createdAt" >= ${fechaInicio}` : Prisma.empty}
+      ${fechaFin ? Prisma.sql`AND "createdAt" <= ${fechaFin}` : Prisma.empty}
       GROUP BY DATE_TRUNC('month', "createdAt")
       ORDER BY mes DESC
     `;
-    const clientesNuevosPorMes = await prisma.$queryRaw(clientesQuery, ...clientesParams);
 
 
     // Top 5 clientes más frecuentes

@@ -4,13 +4,17 @@ import {
   obtenerPerfilNegocio,
   actualizarPerfilNegocio,
   obtenerEstadisticasAvanzadas,
-  obtenerReporteMensual
+  obtenerReporteMensual,
+  obtenerInfoConsultorio
 } from '../controllers/negocio.controller';
-import { requireAdmin } from '../middleware/auth.middleware';
+import { requireAdmin, requireUser } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// Todas las rutas requieren autenticación de administrador
+// Ruta para clientes - solo requiere autenticación básica
+router.get('/info-consultorio', requireUser, obtenerInfoConsultorio);
+
+// Todas las demás rutas requieren autenticación de administrador
 router.use(requireAdmin);
 
 router.get('/dashboard', obtenerDashboard);
