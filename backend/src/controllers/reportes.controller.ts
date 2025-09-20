@@ -47,7 +47,6 @@ export const generarReportePacientes = async (req: AuthenticatedRequest, res: Re
       return res.status(400).json({ error: 'Doctor no especificado' });
     }
 
-    // Verificar que el doctor (usuario admin) pertenece al negocio
     const doctor = await prisma.usuario.findUnique({
       where: { id: doctorId },
       select: { negocioId: true, rol: true },
