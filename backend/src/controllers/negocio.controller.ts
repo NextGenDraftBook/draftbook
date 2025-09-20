@@ -247,7 +247,7 @@ export const actualizarPerfilNegocio = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando perfil del negocio:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

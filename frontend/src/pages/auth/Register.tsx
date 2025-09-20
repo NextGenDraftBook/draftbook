@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,7 +41,6 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [accessCode, setAccessCode] = useState('');
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [showAccessForm, setShowAccessForm] = useState(true);
   const [tipoRegistro, setTipoRegistro] = useState<RegistroTipo>('negocio');
   const [negociosDisponibles, setNegociosDisponibles] = useState<any[]>([]);
@@ -50,8 +49,6 @@ const Register: React.FC = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -88,7 +85,6 @@ const Register: React.FC = () => {
     }
 
     if (isValid) {
-      setIsAuthorized(true);
       setShowAccessForm(false);
       toast.success(message);
     } else {

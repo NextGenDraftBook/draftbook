@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils/cn';
-import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
