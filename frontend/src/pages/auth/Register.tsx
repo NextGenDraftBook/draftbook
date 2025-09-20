@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +25,9 @@ const registerSchema = z.object({
   descripcion: z.string().optional(),
   especialidad: z.string().optional(),
   horarioAtencion: z.string().optional(),
-  sitioWeb: z.string().url('Debe ser una URL válida').optional().transform(val => val === '' ? undefined : val)
+  sitioWeb: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
+    message: "Debe ser una URL válida"
+  })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -41,7 +43,6 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [accessCode, setAccessCode] = useState('');
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [showAccessForm, setShowAccessForm] = useState(true);
   const [tipoRegistro, setTipoRegistro] = useState<RegistroTipo>('negocio');
   const [negociosDisponibles, setNegociosDisponibles] = useState<any[]>([]);
@@ -50,8 +51,6 @@ const Register: React.FC = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -88,7 +87,6 @@ const Register: React.FC = () => {
     }
 
     if (isValid) {
-      setIsAuthorized(true);
       setShowAccessForm(false);
       toast.success(message);
     } else {
@@ -390,8 +388,8 @@ const Register: React.FC = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.telefono.message}</p>
                 )}
               </div>
-          </div> 
-            </div>  
+            </div>
+
             {tipoRegistro === 'negocio' && (
               <div className="bg-blue-50 p-4 rounded-md">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Consultorio</h3>
