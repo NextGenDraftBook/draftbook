@@ -386,7 +386,7 @@ const Register: React.FC = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.telefono.message}</p>
                 )}
               </div>
-            </div>            {/* Información del Negocio - Solo para consultorios */}
+          </div> {/* Información del Negocio - Solo para consultorios */}
             {tipoRegistro === 'negocio' && (
               <div className="bg-blue-50 p-4 rounded-md">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Consultorio</h3>
