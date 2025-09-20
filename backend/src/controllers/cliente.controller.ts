@@ -69,7 +69,7 @@ export const crearCliente = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando cliente:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -278,57 +278,9 @@ export const actualizarCliente = async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando cliente:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-};
-
-export const eliminarCliente = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    if (!req.negocio) {
-      return res.status(400).json({ error: 'Negocio no identificado' });
-    }
-
-    // Verificar que el cliente existe y pertenece al negocio
-    const cliente = await prisma.cliente.findFirst({
-      where: {
-        id,
-        negocioId: req.negocio.id
-      }
-    });
-
-    if (!cliente) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
-    }
-
-    // Verificar si el cliente tiene citas activas
-    const citasActivas = await prisma.cita.findFirst({
-      where: {
-        clienteId: id,
-        estado: {
-          in: ['PENDIENTE', 'CONFIRMADA']
-        }
-      }
-    });
-
-    if (citasActivas) {
-      return res.status(400).json({ 
-        error: 'No se puede eliminar el cliente porque tiene citas activas' 
-      });
-    }
-
-    // Eliminar el cliente (esto también eliminará citas, documentos, recetas y pagos relacionados)
-    await prisma.cliente.delete({
-      where: { id }
-    });
-
-    res.json({ message: 'Cliente eliminado exitosamente' });
-  } catch (error) {
-    console.error('Error eliminando cliente:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
@@ -414,6 +366,58 @@ export const obtenerEstadisticasCliente = async (req: Request, res: Response) =>
     });
   } catch (error) {
     console.error('Error obteniendo estadísticas del cliente:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+export const eliminarCliente = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.negocio) {
+      return res.status(400).json({ error: 'Negocio no identificado' });
+    }
+
+    // Verificar que el cliente existe y pertenece al negocio
+    const cliente = await prisma.cliente.findFirst({
+      where: {
+        id,
+        negocioId: req.negocio.id
+      }
+    });
+
+    if (!cliente) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    // Verificar si el cliente tiene citas pendientes
+    const citasPendientes = await prisma.cita.count({
+      where: {
+        clienteId: id,
+        estado: {
+          in: ['PENDIENTE', 'CONFIRMADA']
+        }
+      }
+    });
+
+    if (citasPendientes > 0) {
+      return res.status(400).json({ 
+        error: 'No se puede eliminar el cliente porque tiene citas pendientes'
+      });
+    }
+
+    // En lugar de eliminar completamente, marcar como inactivo
+    const clienteActualizado = await prisma.cliente.update({
+      where: { id },
+      data: { activo: false }
+    });
+
+    res.json({
+      message: 'Cliente eliminado exitosamente',
+      cliente: clienteActualizado
+    });
+  } catch (error) {
+    console.error('Error eliminando cliente:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

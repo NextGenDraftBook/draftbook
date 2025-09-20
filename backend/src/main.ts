@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route';
 import reportesRoutes from './routes/reportes.route';
+import adminRoutes from './routes/admin.routes';
+import clienteRoutes from './routes/cliente.routes';
+import negocioRoutes from './routes/negocio.routes';
+import superadminRoutes from './routes/superadmin.routes';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -20,6 +24,10 @@ app.use(express.json());
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/cliente', clienteRoutes);
+app.use('/api/negocio', negocioRoutes);
+app.use('/api/superadmin', superadminRoutes);
 
 // Ruta de prueba
 app.get('/api/health', (req, res) => {

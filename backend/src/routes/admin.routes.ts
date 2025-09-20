@@ -22,11 +22,12 @@ import {
   updatePagoCliente,
   deletePagoCliente
 } from '../controllers/admin.controller';
-import { descargarRecetaPDF } from '../controllers/receta.controller';
-import { authMiddleware as verificarToken } from '../middleware/auth.middleware';
-import { verificarRol } from '../middleware/roles.middleware';
+// import { descargarRecetaPDF } from '../controllers/receta.controller';
+import { authMiddleware as verificarToken, requireRole } from '../middleware/auth.middleware';
+// Crear un alias para verificarRol basado en requireRole
+const verificarRol = (roles: string[]) => requireRole(roles);
 // Importar rutas de documentos
-import documentoRoutes from './documento.routes';
+// import documentoRoutes from './documento.routes';
 
 const router = express.Router();
 
@@ -54,14 +55,14 @@ router.delete('/clientes/:id', eliminarCliente);
 router.get('/clientes/:id/expediente', obtenerExpediente);
 
 // Documentos
-router.use('/documentos', documentoRoutes);
+// router.use('/documentos', documentoRoutes);
 
 // Recetas
 router.get('/recetas', obtenerRecetas);
 router.post('/recetas', crearReceta);
 router.put('/recetas/:id', actualizarReceta);
 router.delete('/recetas/:id', eliminarReceta);
-router.get('/recetas/:id/pdf', descargarRecetaPDF);
+// router.get('/recetas/:id/pdf', descargarRecetaPDF);
 
 // Expedientes
 router.get('/expedientes/:clienteId', obtenerExpediente);

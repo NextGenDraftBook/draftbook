@@ -25,7 +25,7 @@ const registerSchema = z.object({
   descripcion: z.string().optional(),
   especialidad: z.string().optional(),
   horarioAtencion: z.string().optional(),
-  sitioWeb: z.string().url('Debe ser una URL válida').optional().or(z.literal(''))
+  sitioWeb: z.string().url('Debe ser una URL válida').optional().transform(val => val === '' ? undefined : val)
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -390,7 +390,8 @@ const Register: React.FC = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.telefono.message}</p>
                 )}
               </div>
-            </div>            {/* Información del Negocio - Solo para consultorios */}
+          </div> 
+            </div>  
             {tipoRegistro === 'negocio' && (
               <div className="bg-blue-50 p-4 rounded-md">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Consultorio</h3>
