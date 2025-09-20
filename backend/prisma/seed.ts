@@ -10,10 +10,10 @@ async function main() {
   const superadminPassword = await bcrypt.hash('admin123', 12);
   
   const superadmin = await prisma.usuario.upsert({
-    where: { email: 'admin@draftcitas.com' },
+    where: { email: 'admin@draftbook.com' },
     update: {},
     create: {
-      email: 'admin@draftcitas.com',
+      email: 'admin@draftbook.com',
       password: superadminPassword,
       nombre: 'Super',
       apellido: 'Administrador',
@@ -239,7 +239,7 @@ Consultorio Demo`,
   console.log('🎉 Seed completado exitosamente!');
   console.log('');
   console.log('📋 Credenciales de acceso:');
-  console.log('   SuperAdmin: admin@draftcitas.com / admin123');
+  console.log('   SuperAdmin: admin@draftbook.com / admin123');
   console.log('   Admin Demo: admin@consultorio.com / admin123');
   console.log('');
   console.log('👥 Clientes de ejemplo:');

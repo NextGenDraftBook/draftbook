@@ -262,7 +262,7 @@ export class ReportesService {
       
       doc.fontSize(8)
          .text(
-           `Página ${i + 1} de ${pages.count} - Generado por DraftCitas - ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
+           `Página ${i + 1} de ${pages.count} - Generado por draftbook - ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
            50,
            750,
            { align: 'center' }

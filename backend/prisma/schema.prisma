@@ -13,7 +13,7 @@ datasource db {
 // Modelo principal para identificar el negocio/cliente
 model Negocio {
   id          String   @id @default(cuid())
-  slug        String   @unique // subdominio: consultoriox.draftcitas.com
+  slug        String   @unique // subdominio: consultoriox.draftbook.com
   nombre      String
   email       String
   telefono    String?
