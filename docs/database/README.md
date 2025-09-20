@@ -1,5 +1,5 @@
 # Pegar en docs/database/README.md
-# Documentación de Base de Datos - DraftCitas
+# Documentación de Base de Datos - draftbook
 
 ## Modelo de Datos
 

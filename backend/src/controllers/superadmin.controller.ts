@@ -150,7 +150,7 @@ export const crearNegocio = async (req: Request, res: Response) => {
     return res.status(201).json(negocio);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando negocio:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -190,7 +190,7 @@ export const actualizarNegocio = async (req: Request, res: Response) => {
     return res.json(negocio);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando negocio:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -292,7 +292,7 @@ export const actualizarPago = async (req: Request, res: Response) => {
     return res.json(pago);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando pago:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -522,7 +522,7 @@ export const crearUsuario = async (req: Request, res: Response) => {
     return res.status(201).json(usuario);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando usuario:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -593,7 +593,7 @@ export const actualizarUsuario = async (req: Request, res: Response) => {
     return res.json(usuario);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error actualizando usuario:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -786,7 +786,7 @@ export const crearPagoManual = async (req: Request, res: Response) => {
     return res.status(201).json(pago);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      return res.status(400).json({ error: error.issues[0].message });
     }
     console.error('Error creando pago manual:', error);
     return res.status(500).json({ error: 'Error interno del servidor' });
