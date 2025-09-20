@@ -8,7 +8,7 @@ npx prisma migrate dev --name nombre_migracion
 
 ### Credenciales de acceso creadas con archivo seed.ts
 # 📋 Credenciales de acceso:
-#    SuperAdmin: admin@draftcitas.com / admin123
+#    SuperAdmin: admin@draftbook.com / admin123
 #    Admin Demo: admin@consultorio.com / admin123
 
 # 👥 Clientes de ejemplo:

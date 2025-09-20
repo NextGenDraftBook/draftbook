@@ -1,160 +1,151 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { AuthProvider, useAuth } from './context/AuthContext'
-import { generalService } from './services/api'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import LoadingSpinner from './components/ui/LoadingSpinner';
 
-interface HealthResponse {
-  status: string;
-  message: string;
-}
+// Componente para rutas protegidas
+const ProtectedRoute: React.FC<{ 
+  children: React.ReactNode; 
+  allowedRoles?: string[];
+}> = ({ children, allowedRoles }) => {
+  const { user, loading } = useAuth();
 
-function LoginForm() {
-  const { login, isLoading } = useAuth();
-  const [email, setEmail] = useState('admin@draftbook.com');
-  const [password, setPassword] = useState('admin123');
-  const [message, setMessage] = useState('');
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await login(email, password);
-    setMessage(result.message);
-  };
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return (
-    <div className="card">
-      <h3>🔐 Login</h3>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-        </button>
-      </form>
-      {message && <p style={{ color: message.includes('exitoso') ? 'green' : 'red' }}>{message}</p>}
-      <p style={{ fontSize: '12px', color: '#666' }}>
-        Usuario demo: admin@draftbook.com / admin123
-      </p>
-    </div>
-  );
-}
+  if (allowedRoles && !allowedRoles.includes(user.rol)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
-function Dashboard() {
+  return <>{children}</>;
+};
+
+// Componente principal de la aplicación
+const AppContent: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
-    <div className="card">
-      <h3>✅ Bienvenido</h3>
-      <p>Usuario: {user?.email}</p>
-      <p>Rol: {user?.role || 'user'}</p>
-      <button onClick={logout} style={{ marginTop: '10px' }}>
-        Cerrar Sesión
-      </button>
-    </div>
+    <Routes>
+      {/* Rutas públicas */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      
+      {/* Ruta raíz - redirigir según rol */}
+      <Route 
+        path="/" 
+        element={
+          user ? (
+            user.rol === 'SUPERADMIN' ? (
+              <Navigate to="/dashboard" replace />
+            ) : user.rol === 'ADMIN' ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
+
+      {/* Dashboard temporal */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-gray-100 p-8">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                    ¡Bienvenido a DraftBook!
+                  </h1>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h2 className="text-xl font-semibold text-blue-800 mb-2">
+                        Usuario Actual
+                      </h2>
+                      <p className="text-blue-600">Nombre: {user?.nombre} {user?.apellido}</p>
+                      <p className="text-blue-600">Email: {user?.email}</p>
+                      <p className="text-blue-600">Rol: {user?.rol}</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h2 className="text-xl font-semibold text-green-800 mb-2">
+                        Sistema Funcionando
+                      </h2>
+                      <p className="text-green-600">✅ Autenticación JWT</p>
+                      <p className="text-green-600">✅ Base de datos Prisma</p>
+                      <p className="text-green-600">✅ Validaciones Zod</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      onClick={logout}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                    >
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Rutas de error */}
+      <Route path="/unauthorized" element={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center bg-white p-8 rounded-lg shadow-md">
+            <h1 className="text-4xl font-bold text-red-600 mb-4">Acceso Denegado</h1>
+            <p className="text-gray-600 mb-4">No tienes permisos para acceder a esta página.</p>
+            <button 
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      } />
+      
+      <Route path="*" element={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center bg-white p-8 rounded-lg shadow-md">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+            <p className="text-gray-600 mb-4">Página no encontrada.</p>
+            <button 
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      } />
+    </Routes>
   );
-}
+};
 
-function AppContent() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [count, setCount] = useState(0)
-  const [backendHealth, setBackendHealth] = useState<HealthResponse | null>(null)
-  const [healthLoading, setHealthLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const checkBackendHealth = async () => {
-      try {
-        setHealthLoading(true)
-        const data = await generalService.healthCheck()
-        setBackendHealth(data)
-        setError(null)
-      } catch (err) {
-        console.error('Error connecting to backend:', err)
-        setError('No se pudo conectar con el backend')
-        setBackendHealth(null)
-      } finally {
-        setHealthLoading(false)
-      }
-    }
-
-    checkBackendHealth()
-  }, [])
-
-  if (isLoading) {
-    return <div>🔄 Cargando...</div>;
-  }
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>📚 DraftBook V1</h1>
-      
-      {/* Estado del Backend */}
-      <div className="card">
-        <h3>🔗 Estado del Backend</h3>
-        {healthLoading ? (
-          <p>🔄 Conectando...</p>
-        ) : error ? (
-          <p style={{color: 'red'}}>❌ {error}</p>
-        ) : backendHealth ? (
-          <p style={{color: 'green'}}>✅ {backendHealth.message}</p>
-        ) : null}
-      </div>
-
-      {/* Sistema de Autenticación */}
-      {isAuthenticated ? <Dashboard /> : <LoginForm />}
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          contador: {count}
-        </button>
-        <p>
-          Edita <code>src/App.tsx</code> y guarda para probar HMR
-        </p>
-      </div>
-      
-      <div className="card">
-        <h3>🚀 Entorno de Desarrollo</h3>
-        <p><strong>Frontend:</strong> React 19 + TypeScript + Vite</p>
-        <p><strong>Backend:</strong> Node.js + Express + TypeScript</p>
-        <p><strong>Puerto Frontend:</strong> 5173</p>
-        <p><strong>Puerto Backend:</strong> 3001</p>
-        <p><strong>Estado:</strong> {isAuthenticated ? '✅ Autenticado' : '❌ No autenticado'}</p>
-      </div>
-
-      <p className="read-the-docs">
-        Haz clic en los logos de Vite y React para aprender más
-      </p>
-    </>
-  )
-}
-
-function App() {
+// Componente principal
+const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <div className="min-h-screen">
+        <AppContent />
+      </div>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;
