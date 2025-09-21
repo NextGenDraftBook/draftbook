@@ -14,10 +14,11 @@
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node"]
+    "types": ["node", "jest"], 
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/tests/**/*"
   ],
   "exclude": [
     "node_modules",
