@@ -282,7 +282,7 @@ const Login: React.FC = () => {
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
             >
-              PageDraft Studio
+              Align
             </a>
           </p>
         </div>

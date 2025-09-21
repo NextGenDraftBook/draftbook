@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Building, Loader2, AlertTriangle, MapPin, Globe, Clock, FileText } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Building, Loader2, AlertTriangle, MapPin, Globe, Clock, FileText, Shield } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import toast from 'react-hot-toast';
 
@@ -16,7 +16,6 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   // Campos condicionales según el tipo de registro
   nombreNegocio: z.string().optional(),
-  negocioId: z.string().optional(), // Para clientes que se registran en un negocio existente
   // Nuevos campos para negocio
   direccion: z.string().optional(),
   ciudad: z.string().optional(),
@@ -35,7 +34,7 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-type RegistroTipo = 'negocio' | 'cliente';
+type RegistroTipo = 'negocio' | 'superadmin';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +44,6 @@ const Register: React.FC = () => {
   const [accessCode, setAccessCode] = useState('');
   const [showAccessForm, setShowAccessForm] = useState(true);
   const [tipoRegistro, setTipoRegistro] = useState<RegistroTipo>('negocio');
-  const [negociosDisponibles, setNegociosDisponibles] = useState<any[]>([]);
 
   // Inicializar hooks ANTES del conditional rendering
   const {
@@ -58,7 +56,7 @@ const Register: React.FC = () => {
 
   // Códigos de acceso (en producción esto debería estar en variables de entorno)
   const BUSINESS_ACCESS_CODE = "NEGOCIO2024";
-  const CLIENT_ACCESS_CODE = "CLIENTE2024";
+  const SUPERADMIN_ACCESS_CODE = "SUPERADMIN2024";
 
   const checkAccessCode = async () => {
     let isValid = false;
@@ -67,23 +65,11 @@ const Register: React.FC = () => {
     if (tipoRegistro === 'negocio' && accessCode === BUSINESS_ACCESS_CODE) {
       isValid = true;
       message = 'Código válido. Puedes registrar tu consultorio/negocio.';
-    } else if (tipoRegistro === 'cliente' && accessCode === CLIENT_ACCESS_CODE) {
+    } else if (tipoRegistro === 'superadmin' && accessCode === SUPERADMIN_ACCESS_CODE) {
       isValid = true;
-      message = 'Código válido. Puedes registrarte como cliente.';
-      
-      // Cargar negocios disponibles para que el cliente elija
-      try {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-        const response = await fetch(`${API_BASE_URL}/public/negocios`);
-        if (response.ok) {
-          const data = await response.json();
-          setNegociosDisponibles(data.negocios || []);
-        }
-      } catch (error) {
-        console.error('Error al cargar negocios:', error);
-      }
+      message = 'Código válido. Puedes registrarte como superadministrador.';
     } else {
-      message = `Código de acceso inválido para registro de ${tipoRegistro}. Contacta al administrador para obtener el código correcto.`;
+      message = `Código de acceso inválido para registro de ${tipoRegistro === 'negocio' ? 'consultorio' : 'superadministrador'}. Contacta al administrador para obtener el código correcto.`;
     }
 
     if (isValid) {
@@ -109,15 +95,14 @@ const Register: React.FC = () => {
           nombreNegocio: data.nombreNegocio,
         };
       } else {
-        // Registro de cliente en un negocio existente
-        endpoint = `${API_BASE_URL}/auth/register-cliente`;
+        // Registro de superadministrador
+        endpoint = `${API_BASE_URL}/auth/registro`;
         requestBody = {
           nombre: data.nombre,
           apellido: data.apellido,
           email: data.email,
           telefono: data.telefono,
           password: data.password,
-          negocioId: data.negocioId,
         };
       }
 
@@ -136,7 +121,7 @@ const Register: React.FC = () => {
 
       const successMessage = tipoRegistro === 'negocio' 
         ? 'Consultorio registrado exitosamente. Por favor inicia sesión.'
-        : 'Registro como cliente exitoso. Por favor inicia sesión.';
+        : 'Superadministrador registrado exitosamente. Por favor inicia sesión.';
       
       toast.success(successMessage);
       navigate('/login');
@@ -188,18 +173,18 @@ const Register: React.FC = () => {
                 </button>
                 
                 <button
-                  onClick={() => setTipoRegistro('cliente')}
+                  onClick={() => setTipoRegistro('superadmin')}
                   className={cn(
                     "p-4 rounded-lg border-2 text-center transition-all",
-                    tipoRegistro === 'cliente'
+                    tipoRegistro === 'superadmin'
                       ? "border-blue-500 bg-blue-50 text-blue-700"
                       : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
                   )}
                 >
-                  <User className="h-6 w-6 mx-auto mb-2" />
-                  <div className="text-sm font-medium">Cliente/Paciente</div>
+                  <Shield className="h-6 w-6 mx-auto mb-2" />
+                  <div className="text-sm font-medium">Superadministrador</div>
                   <div className="text-xs text-gray-500 mt-1">
-                    Registro como paciente
+                    Registro de superadmin del sistema
                   </div>
                 </button>
               </div>
@@ -207,7 +192,7 @@ const Register: React.FC = () => {
 
             <div>
               <label htmlFor="access-code" className="block text-sm font-medium text-gray-700">
-                Código de Acceso {tipoRegistro === 'negocio' ? 'para Consultorios' : 'para Clientes'}
+                Código de Acceso {tipoRegistro === 'negocio' ? 'para Consultorios' : 'para Superadministradores'}
               </label>
               <div className="mt-1">
                 <input
@@ -217,7 +202,7 @@ const Register: React.FC = () => {
                   onChange={(e) => setAccessCode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && checkAccessCode()}
                   className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder={`Código para ${tipoRegistro === 'negocio' ? 'consultorios' : 'clientes'}`}
+                  placeholder={`Código para ${tipoRegistro === 'negocio' ? 'consultorios' : 'superadministradores'}`}
                 />
               </div>
             </div>
@@ -248,7 +233,7 @@ const Register: React.FC = () => {
                 <strong>¿Necesitas acceso?</strong><br />
                 {tipoRegistro === 'negocio' 
                   ? 'Contacta al administrador para obtener el código de acceso para registrar tu consultorio.'
-                  : 'Solicita el código de acceso a tu consultorio médico para registrarte como paciente.'
+                  : 'Contacta al administrador principal para obtener el código de acceso de superadministrador.'
                 }
               </p>
             </div>
@@ -278,12 +263,12 @@ const Register: React.FC = () => {
             </svg>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {tipoRegistro === 'negocio' ? 'Registrar Consultorio' : 'Registrar Cliente'}
+            {tipoRegistro === 'negocio' ? 'Registrar Consultorio' : 'Registrar Superadministrador'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {tipoRegistro === 'negocio' 
               ? 'Registra tu consultorio médico en draftbook' 
-              : 'Únete como paciente a un consultorio existente'
+              : 'Crear cuenta de superadministrador del sistema'
             }
           </p>
         </div>
@@ -568,44 +553,6 @@ const Register: React.FC = () => {
               </div>
             )}
 
-            {/* Selección de Consultorio - Solo para clientes */}
-            {tipoRegistro === 'cliente' && (
-              <div className="bg-green-50 p-4 rounded-md">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Seleccionar Consultorio</h3>
-                
-                <div className="mt-4">
-                  <label htmlFor="negocioId" className="block text-sm font-medium text-gray-700">
-                    Consultorio Médico
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      {...register('negocioId', { 
-                        required: tipoRegistro === 'cliente' ? 'Debes seleccionar un consultorio' : false 
-                      })}
-                      id="negocioId"
-                      className={cn(
-                        'appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
-                        errors.negocioId && 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                      )}
-                    >
-                      <option value="">Selecciona tu consultorio médico</option>
-                      {negociosDisponibles.map((negocio) => (
-                        <option key={negocio.id} value={negocio.id}>
-                          {negocio.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {errors.negocioId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.negocioId.message}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    Selecciona el consultorio donde eres paciente. Si no encuentras tu consultorio, contacta al personal médico.
-                  </p>
-                </div>
-              </div>
-            )}
-
             {/* Contraseñas */}
             <div className="bg-gray-50 p-4 rounded-md">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Seguridad</h3>
@@ -691,7 +638,7 @@ const Register: React.FC = () => {
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                tipoRegistro === 'negocio' ? 'Registrar Consultorio' : 'Registrar Cliente'
+                tipoRegistro === 'negocio' ? 'Registrar Consultorio' : 'Registrar Superadministrador'
               )}
             </button>
           </div>
